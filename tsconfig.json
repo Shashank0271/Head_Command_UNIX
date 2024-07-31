@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    // "moduleResolution": "Node",
+    // "types": ["node"],
+    // "typeRoots": [
+    //   "./node_modules/@types",
+    //   "../node_modules/@types",
+    //   "../../node_modules/@types"
+    // ],
+    "target": "ESNext",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}
