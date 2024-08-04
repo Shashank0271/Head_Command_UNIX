@@ -48,10 +48,21 @@ if (input.length < 4) {
       !isNaN(Number(input[3]!.substring(2)))
     ) {
       //update if lines / bytes have been passed
-      limit = Number(input[3]!.substring(2));
-      files = input.slice(4);
+      try {
+        if (input[3]!.startsWith("-n")) {
+          limit = Number(input[3]!.substring(2));
+          files = input.slice(4);
+        } else if (input[3]!.startsWith("-c")) {
+          limit = Number(input[4]!);
+          files = input.slice(5);
+        }
+      } catch (e: any) {
+        console.error(
+          "Please enter valid command , script failed with error :\n ",
+          e.toString()
+        );
+      }
     }
-
     processFiles(files, limit);
   } catch (error: any) {
     console.error(error.toString());
@@ -63,6 +74,7 @@ async function processFiles(files: string[], limit: number) {
 
   for (let i = 0; i < files.length; i++) {
     const fileName: any = files[i];
+
     if (printTitle) {
       console.log(`==> ${fileName} <==`, "\n");
     }
@@ -70,6 +82,7 @@ async function processFiles(files: string[], limit: number) {
     if (input[3]!.startsWith("-c")) {
       await readFileTillCBytes(fileName as string, limit);
     } else {
+      //if no flag is mentioned then the default is using "n"
       await readFileTillNLines(fileName as string, limit);
     }
 

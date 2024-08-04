@@ -1,4 +1,3 @@
-import { rejects } from "node:assert";
 import fs from "node:fs/promises";
 import ReadLine from "readline/promises";
 
@@ -17,7 +16,6 @@ export const readFileTillNLines = async (
       const fileContent: string = fileContentBuffer.toString("utf-8");
       const newLines = fileContent.match(/\n/g)?.length;
       if (newLines && newLines >= n) {
-        //if we encounter that many lines or more
         logged = true;
         //we need all the content till the nth index of \n
         let content = "",
@@ -34,10 +32,17 @@ export const readFileTillNLines = async (
           }
         }
         console.log(fileContent.substring(0, pos + 1));
+        fileReadStream.close();
       }
     });
 
+    fileReadStream.on("close", () => {
+      // when we are closing it ourselves
+      resolve();
+    });
+
     fileReadStream.on("end", async () => {
+      //when all the data has been read
       if (!logged) {
         console.log(fileContentBuffer.toString("utf-8"));
       }
@@ -57,7 +62,38 @@ export const readFileTillCBytes = async (
   fileName: string,
   c: number
 ): Promise<void> => {
-  //TODO
+  return new Promise<void>(async (resolve, reject) => {
+    const fileHandler = await fs.open(fileName, "r");
+    const fileReadStream = fileHandler.createReadStream();
+
+    let fileContentBuffer = Buffer.alloc(0); //0 bytes
+    let logged = false;
+
+    fileReadStream.on("data", (chunk: Buffer) => {
+      fileContentBuffer = Buffer.concat([fileContentBuffer, chunk]);
+      if (fileContentBuffer.byteLength >= c) {
+        console.log(fileContentBuffer.subarray(0, c).toString("utf-8"));
+        logged = true;
+        fileReadStream.close();
+      }
+    });
+
+    fileReadStream.on("close", () => {
+      resolve();
+    });
+
+    fileReadStream.on("end", () => {
+      if (!logged) {
+        console.log(fileContentBuffer.toString("utf-8"));
+      }
+      resolve();
+    });
+
+    fileReadStream.on("error", (error: Error) => {
+      console.error(error.message);
+      reject();
+    });
+  });
 };
 
 export const handleCCHead = () => {
